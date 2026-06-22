@@ -3,7 +3,7 @@
 ## 1. 总体方案
 
 - 使用官方 Libri-Light `10h` 标注集训练，`dev-clean` 用于模型选择，`test-clean` 和 `test-other` 用于最终评测。
-- 使用官方 Libri-Light `1h` 子集进行标注数据规模消融。
+- 使用官方 Libri-Light `1h` 子集和 LibriSpeech `train-clean-100` 进行 1h/10h/100h 标注数据规模消融。
 - 主上游为冻结的 `microsoft/wavlm-base-plus`，不微调、不反向传播，仅离线提取 hidden states。
 - 研究主线是连续表征与 K-means 离散单元在识别准确率、推理成本和信息率上的权衡。
 - 下游比较 `2-layer BiLSTM + CTC` 与 `Transformer Encoder-Decoder`。
@@ -20,6 +20,7 @@
 
 - 训练集：Libri-Light 官方 `10h` 有标注划分，音频来自 LibriSpeech。
 - 数据规模消融：Libri-Light 官方 `1h` 有标注划分。
+- 扩展规模消融：LibriSpeech `train-clean-100`，用于构建 100h 训练配置。
 - 验证集：`dev-clean`，仅用于早停、选层和超参数选择。
 - 测试集：`test-clean`、`test-other`，只在配置锁定后进行最终评测。
 - 音频统一为单声道、16 kHz。
@@ -28,7 +29,7 @@
 
 ### 3.1 数据与模型下载
 
-- 项目脚本负责将 LibriSpeech 音频和 Libri-Light 官方 1h/10h manifest 下载到 `data/`。
+- 项目脚本负责将 Libri-Light 官方 1h/10h 音频与转写、LibriSpeech `train-clean-100` 和评测集下载到 `data/`。
 - 项目脚本负责将 WavLM Base+、HuBERT Base 和 wav2vec 2.0 Base 下载到 `models/` 或项目指定的 Hugging Face 缓存目录。
 - 下载过程支持通过 `HTTPS_PROXY=http://127.0.0.1:7892` 访问外部资源，并支持断点续传和已下载文件复用。
 - 下载完成后校验所需划分、文件数量、可读取性及模型 checkpoint revision。
@@ -87,7 +88,7 @@
 
 ## 7. 实验矩阵
 
-计划完成 17 个训练配置：
+计划完成 19 个训练配置：
 
 | 实验组 | 配置数 | 内容 |
 | --- | ---: | --- |
@@ -96,7 +97,7 @@
 | SSL 模型比较 | 2 | HuBERT Base、wav2vec 2.0 Base 第 9 层 + CTC |
 | 码本大小 | 3 | 最佳 WavLM 层，K=50/100/200 + CTC |
 | 序列压缩 | 2 | K=100 去重、去重+时长 + CTC |
-| 标注数据规模 | 2 | 1h 连续与 K=100 离散 + CTC |
+| 标注数据规模 | 4 | 1h 和 100h 的连续与 K=100 离散 + CTC |
 | Transformer 主系统 | 2 | 10h 连续与 K=100 逐帧离散 |
 
 主结果表形成连续/离散表征与 CTC/Transformer 下游的 2x2 对比。
@@ -139,12 +140,12 @@
 - 单元测试覆盖文本规范化、数据集无交叉、padding mask、CTC 解码、K-means ID 范围、去重、时长恢复、bitrate 和 WER/CER。
 - 验证 SSL 模型参数无梯度、始终处于评估模式，并且相同音频的缓存特征可重复。
 - 使用少量语音完成“数据 -> 特征 -> 聚类 -> 两种下游 -> 评测”的端到端 smoke test。
-- 全部 17 个配置必须能通过配置文件复现。
+- 全部 19 个配置必须能通过配置文件复现。
 - 主表、消融表和分析图能够从实验结果自动重建。
 
 ## 12. 范围边界与研究假设
 
-- 本项目不进行 SSL 上游微调、语言模型融合、多语言实验或 100h 训练。
+- 本项目不进行 SSL 上游微调、语言模型融合、多语言实验或 360h/960h 训练。
 - 假设连续表征具有更低 WER，离散表征能够显著降低 bitrate。
 - 假设时长 embedding 能够部分恢复去重造成的识别性能损失。
 - Transformer 是否优于 CTC 由实验确定，不预设结果。
