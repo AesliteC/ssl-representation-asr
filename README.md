@@ -1,0 +1,85 @@
+# SSL Representation ASR
+
+本仓库用于完成“基于语音自监督模型的 ASR”课程作业，实验方向为冻结 SSL 表征下的低资源语音识别。
+
+## 环境
+
+推荐使用已约定的 Conda 环境：
+
+```powershell
+conda activate py310
+python --version
+pip install -r requirements.txt
+```
+
+Python 版本应为 `3.10.20`。如果 PyTorch 需要匹配本机 CUDA，请优先按 PyTorch 官方安装命令安装 `torch` 和 `torchaudio`，再运行上面的 `pip install -r requirements.txt`。
+
+如果直连 PyPI 遇到 SSL 或超时问题，可以改用公开镜像安装：
+
+```powershell
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+## 下载数据与模型
+
+下载脚本默认直连，并且会临时忽略本机 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 等代理环境变量。数据和模型都会写入被 `.gitignore` 排除的目录，不会提交到 Git。
+
+```powershell
+conda activate py310
+python scripts/download_assets.py
+```
+
+默认行为：
+
+- 下载 Libri-Light `librispeech_finetuning.tgz`，用于官方 1h/10h 标注划分。
+- 下载 LibriSpeech `train-clean-100`、`dev-clean`、`test-clean`、`test-other`。
+- 下载并固定 WavLM Base+、HuBERT Base、wav2vec 2.0 Base 三个 SSL checkpoint revision。
+- 将压缩包保存到 `data/downloads/`，解压到 `data/raw/`，模型保存到 `models/`。
+- 已存在且校验通过的文件会自动复用。
+
+常用选项：
+
+```powershell
+# 只下载数据，不下载模型
+python scripts/download_assets.py --data-only
+
+# 只下载模型
+python scripts/download_assets.py --models-only
+
+# 只准备某些划分
+python scripts/download_assets.py --data dev-clean test-clean --data-only
+
+# 只准备主模型
+python scripts/download_assets.py --models wavlm-base-plus --models-only
+
+# 下载但不解压
+python scripts/download_assets.py --data-only --skip-extract
+```
+
+如果某位组员所在网络必须使用代理，请显式打开环境代理模式，并自行填写自己的代理地址：
+
+```powershell
+$env:HTTPS_PROXY="http://<proxy-host>:<proxy-port>"
+$env:HTTP_PROXY="http://<proxy-host>:<proxy-port>"
+python scripts/download_assets.py --use-env-proxy
+```
+
+## 手动下载
+
+自动下载失败时，可以手动下载以下文件并放到 `data/downloads/`，然后重新运行脚本完成校验和解压：
+
+- `https://dl.fbaipublicfiles.com/librilight/data/librispeech_finetuning.tgz`
+- `https://www.openslr.org/resources/12/dev-clean.tar.gz`
+- `https://www.openslr.org/resources/12/test-clean.tar.gz`
+- `https://www.openslr.org/resources/12/test-other.tar.gz`
+- `https://www.openslr.org/resources/12/train-clean-100.tar.gz`
+
+模型可从 Hugging Face 页面手动下载 `config.json`、`preprocessor_config.json` 和 `pytorch_model.bin`，分别放入：
+
+- `models/wavlm-base-plus/`：`microsoft/wavlm-base-plus`
+- `models/hubert-base-ls960/`：`facebook/hubert-base-ls960`
+- `models/wav2vec2-base/`：`facebook/wav2vec2-base`
+
+## 当前阶段
+
+当前仓库已包含项目方案、下载脚本和下载脚本测试。后续代码会继续按数据准备、特征缓存、离散化、训练、评测与结果汇总逐步补全。

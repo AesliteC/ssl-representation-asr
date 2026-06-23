@@ -1,0 +1,14 @@
+requests>=2.33
+huggingface_hub>=1.10
+torch
+torchaudio
+transformers
+soundfile
+scikit-learn
+jiwer
+numpy
+pandas
+pyyaml
+tqdm
+tensorboard
+matplotlib
