@@ -122,4 +122,4 @@ python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --m
 
 ## 当前阶段
 
-当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本和基础 ASR 工具测试。后续代码会继续按离散化、训练、评测与结果汇总逐步补全。
+当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本、离散单元工具和基础 ASR 工具测试。后续代码会继续按 K-means 脚本、训练、评测与结果汇总逐步补全。
