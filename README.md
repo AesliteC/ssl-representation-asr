@@ -80,6 +80,26 @@ python scripts/download_assets.py --use-env-proxy
 - `models/hubert-base-ls960/`：`facebook/hubert-base-ls960`
 - `models/wav2vec2-base/`：`facebook/wav2vec2-base`
 
+## 构建 Manifest
+
+下载和解压完成后，可以生成训练、验证和测试用的 JSONL manifest：
+
+```powershell
+python scripts/build_manifests.py
+```
+
+默认会读取 `data/raw/` 下已存在的划分，并将结果写入 `data/manifests/`。每行包含相对音频路径、原始文本、规范化文本、说话人、章节和 split 名称。
+
+常用选项：
+
+```powershell
+# 只构建 dev-clean
+python scripts/build_manifests.py --split dev-clean
+
+# 为任意 LibriSpeech 风格目录构建 manifest
+python scripts/build_manifests.py --split-dir data/raw/LibriSpeech/dev-clean --split dev-clean --output data/manifests/dev-clean.jsonl
+```
+
 ## 当前阶段
 
-当前仓库已包含项目方案、下载脚本和下载脚本测试。后续代码会继续按数据准备、特征缓存、离散化、训练、评测与结果汇总逐步补全。
+当前仓库已包含项目方案、下载脚本、manifest 构建脚本和基础 ASR 工具测试。后续代码会继续按特征缓存、离散化、训练、评测与结果汇总逐步补全。
