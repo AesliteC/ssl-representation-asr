@@ -9,17 +9,42 @@ param(
 $ErrorActionPreference = "Stop"
 New-Item -ItemType Directory -Force -Path (Split-Path $LogPath) | Out-Null
 
+function Write-ExperimentLogLine {
+    param(
+        [string]$Message
+    )
+
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    $stream = New-Object System.IO.FileStream($LogPath, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite)
+    $writer = New-Object System.IO.StreamWriter($stream, $utf8NoBom)
+    try {
+        $writer.WriteLine($Message)
+        $writer.Flush()
+    }
+    finally {
+        $writer.Dispose()
+        $stream.Dispose()
+    }
+}
+
 function Invoke-ExperimentStep {
     param(
         [string[]]$PythonArgs
     )
 
-    $display = "conda run -n py310 python " + ($PythonArgs -join " ")
+    $display = "conda run --no-capture-output -n py310 python " + ($PythonArgs -join " ")
     Write-Host "[run] $display"
-    Add-Content -Path $LogPath -Value "[run] $display"
-    & conda run -n py310 python @PythonArgs 2>&1 | Tee-Object -FilePath $LogPath -Append
-    if ($LASTEXITCODE -ne 0) {
-        throw "Command failed with exit code ${LASTEXITCODE}: $display"
+    Write-ExperimentLogLine "[run] $display"
+    & conda run --no-capture-output -n py310 python @PythonArgs 2>&1 | ForEach-Object {
+        $line = "$_"
+        Write-Host $line
+        Write-ExperimentLogLine $line
+    }
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        $message = "Command failed with exit code ${exitCode}: $display"
+        Write-ExperimentLogLine $message
+        throw $message
     }
 }
 
