@@ -1,0 +1,30 @@
+name: wavlm_continuous_transformer_smoke
+seed: 42
+data:
+  train_manifest: data/manifests/libri-light-10h.jsonl
+  dev_manifest: data/manifests/dev-clean.jsonl
+  test_manifests:
+    - data/manifests/test-clean.jsonl
+representation:
+  kind: continuous
+  model: wavlm-base-plus
+  layer: 9
+  feature_root: features
+  input_dim: 768
+model:
+  type: transformer
+  d_model: 32
+  num_encoder_layers: 1
+  num_decoder_layers: 1
+  nhead: 4
+  dim_feedforward: 64
+  dropout: 0.1
+training:
+  epochs: 1
+  batch_size: 2
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  grad_clip: 5.0
+  patience: 1
+  num_workers: 0
+output_dir: outputs/wavlm_continuous_transformer_smoke

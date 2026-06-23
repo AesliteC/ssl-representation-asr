@@ -1,0 +1,31 @@
+name: scale_100h_units_k100_ctc
+seed: 42
+data:
+  train_manifest: data/manifests/train-clean-100.jsonl
+  dev_manifest: data/manifests/dev-clean.jsonl
+  test_manifests:
+  - data/manifests/test-clean.jsonl
+  - data/manifests/test-other.jsonl
+representation:
+  kind: discrete
+  model: wavlm-base-plus
+  layer: 9
+  feature_root: features
+  input_dim: 768
+  codebook_size: 100
+  unit_root: units
+model:
+  type: ctc
+  hidden_size: 256
+  projection_dim: 256
+  num_layers: 2
+  dropout: 0.2
+training:
+  epochs: 50
+  batch_size: 8
+  learning_rate: 0.001
+  weight_decay: 0.01
+  grad_clip: 5.0
+  patience: 8
+  num_workers: 0
+output_dir: outputs/scale_100h_units_k100_ctc

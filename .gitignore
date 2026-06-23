@@ -18,18 +18,19 @@ venv/
 Thumbs.db
 
 # Datasets and cached representations
-data/
-datasets/
-cache/
-features/
-units/
-models/
+/data/
+/datasets/
+/cache/
+/features/
+/units/
+/models/
 
 # Training outputs and model weights
-artifacts/
-outputs/
-checkpoints/
-runs/
+/artifacts/
+/outputs/
+/results/
+/checkpoints/
+/runs/
 wandb/
 *.ckpt
 *.pt

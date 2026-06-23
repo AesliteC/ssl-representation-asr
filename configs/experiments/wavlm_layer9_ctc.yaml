@@ -1,0 +1,29 @@
+name: wavlm_layer9_ctc
+seed: 42
+data:
+  train_manifest: data/manifests/libri-light-10h.jsonl
+  dev_manifest: data/manifests/dev-clean.jsonl
+  test_manifests:
+  - data/manifests/test-clean.jsonl
+  - data/manifests/test-other.jsonl
+representation:
+  kind: continuous
+  model: wavlm-base-plus
+  layer: 9
+  feature_root: features
+  input_dim: 768
+model:
+  type: ctc
+  hidden_size: 256
+  projection_dim: 256
+  num_layers: 2
+  dropout: 0.2
+training:
+  epochs: 50
+  batch_size: 8
+  learning_rate: 0.001
+  weight_decay: 0.01
+  grad_clip: 5.0
+  patience: 8
+  num_workers: 0
+output_dir: outputs/wavlm_layer9_ctc

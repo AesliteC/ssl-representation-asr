@@ -120,6 +120,52 @@ python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --m
 python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --model hubert-base-ls960 --layer 9
 ```
 
+## 离散单元
+
+连续特征准备好后，可以拟合 K-means 码本并量化为离散 unit：
+
+```powershell
+python scripts/fit_kmeans.py --manifest data/manifests/libri-light-10h.jsonl --model wavlm-base-plus --layer 9 --codebook-size 100
+python scripts/quantize_units.py --manifest data/manifests/libri-light-10h.jsonl --model wavlm-base-plus --layer 9 --codebook-size 100
+```
+
+默认输出目录为 `units/`，其中包含 codebook、逐帧 unit、相邻去重 unit、run length 和 duration bucket。
+
+## 训练、评测与汇总
+
+生成完整 19 个实验配置：
+
+```powershell
+python scripts/generate_experiment_configs.py --output-dir configs/experiments
+```
+
+准备所有正式实验需要的 manifest、SSL 特征、K-means codebook 和离散 unit cache：
+
+```powershell
+python scripts/prepare_experiment_assets.py --device cuda
+```
+
+运行全部 19 个训练配置：
+
+```powershell
+python scripts/run_experiments.py --config-dir configs/experiments --device cuda --skip-existing
+```
+
+对所有已训练 checkpoint 进行测试集评测并汇总：
+
+```powershell
+python scripts/evaluate_experiments.py --config-dir configs/experiments --device cuda --skip-missing
+python scripts/summarize.py --outputs-dir outputs --output results/summary.csv
+```
+
+快速 smoke test 可以使用 `configs/smoke/` 下的小配置：
+
+```powershell
+python scripts/train.py --config configs/smoke/wavlm_continuous_ctc_smoke.yaml --device cuda --limit-train 2 --limit-dev 2
+python scripts/train.py --config configs/smoke/wavlm_units_ctc_smoke.yaml --device cuda --limit-train 2 --limit-dev 2
+python scripts/train.py --config configs/smoke/wavlm_continuous_transformer_smoke.yaml --device cuda --limit-train 2 --limit-dev 2
+```
+
 ## 当前阶段
 
-当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本、离散单元工具和基础 ASR 工具测试。后续代码会继续按 K-means 脚本、训练、评测与结果汇总逐步补全。
+当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本、K-means/unit 脚本、训练脚本、评测脚本、汇总脚本、完整实验配置和 smoke 配置。
