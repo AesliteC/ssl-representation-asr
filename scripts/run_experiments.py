@@ -16,10 +16,23 @@ def iter_configs(config_dir: Path, pattern: str | None) -> list[Path]:
     return configs
 
 
-def run_command(command: list[str], *, dry_run: bool) -> None:
+def completed_training_artifacts(output_dir: Path) -> bool:
+    return all(
+        (output_dir / filename).exists()
+        for filename in ("best.pt", "metrics.json", "config.resolved.yaml")
+    )
+
+
+def run_command(command: list[str], *, dry_run: bool, output_dir: Path) -> None:
     print("[run] " + " ".join(command))
     if not dry_run:
-        subprocess.run(command, check=True)
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError:
+            if completed_training_artifacts(output_dir):
+                print(f"[warn] training command failed after complete artifacts were written: {output_dir}")
+                return
+            raise
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -53,7 +66,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             command += ["--limit-train", str(args.limit_train)]
         if args.limit_dev is not None:
             command += ["--limit-dev", str(args.limit_dev)]
-        run_command(command, dry_run=args.dry_run)
+        run_command(command, dry_run=args.dry_run, output_dir=output_dir)
     return 0
 
 
