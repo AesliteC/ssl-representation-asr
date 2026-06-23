@@ -100,6 +100,26 @@ python scripts/build_manifests.py --split dev-clean
 python scripts/build_manifests.py --split-dir data/raw/LibriSpeech/dev-clean --split dev-clean --output data/manifests/dev-clean.jsonl
 ```
 
+## 提取冻结 SSL 特征
+
+Manifest 准备好后，可以从本地 checkpoint 提取指定 hidden layer，并缓存为 FP16：
+
+```powershell
+python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --model wavlm-base-plus --layer 9 --device cpu
+```
+
+默认输出目录为 `features/<model>/layer<layer>/<split>/`。如果机器有可用 CUDA，可以把 `--device cpu` 改为 `--device cuda`，或省略该参数让脚本自动选择。
+
+常用选项：
+
+```powershell
+# 只 smoke test 前 1 条
+python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --model wavlm-base-plus --layer 9 --limit 1
+
+# 比较 HuBERT 第 9 层
+python scripts/extract_features.py --manifest data/manifests/dev-clean.jsonl --model hubert-base-ls960 --layer 9
+```
+
 ## 当前阶段
 
-当前仓库已包含项目方案、下载脚本、manifest 构建脚本和基础 ASR 工具测试。后续代码会继续按特征缓存、离散化、训练、评测与结果汇总逐步补全。
+当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本和基础 ASR 工具测试。后续代码会继续按离散化、训练、评测与结果汇总逐步补全。
