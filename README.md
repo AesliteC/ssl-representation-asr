@@ -151,6 +151,13 @@ python scripts/prepare_experiment_assets.py --device cuda
 python scripts/run_experiments.py --config-dir configs/experiments --device cuda --skip-existing
 ```
 
+也可以用 Windows tmux 在后台启动完整流水线：
+
+```powershell
+python scripts/start_tmux_experiments.py --tmux "$env:LOCALAPPDATA\Microsoft\WinGet\Links\tmux.exe" --device cuda
+& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\tmux.exe" attach -t ssl_asr_full
+```
+
 对所有已训练 checkpoint 进行测试集评测并汇总：
 
 ```powershell

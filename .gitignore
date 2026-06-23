@@ -29,6 +29,7 @@ Thumbs.db
 /artifacts/
 /outputs/
 /results/
+/logs/
 /checkpoints/
 /runs/
 wandb/
