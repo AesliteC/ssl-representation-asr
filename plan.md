@@ -31,7 +31,7 @@
 
 - 项目脚本负责将 Libri-Light 官方 1h/10h 音频与转写、LibriSpeech `train-clean-100` 和评测集下载到 `data/`。
 - 项目脚本负责将 WavLM Base+、HuBERT Base 和 wav2vec 2.0 Base 下载到 `models/` 或项目指定的 Hugging Face 缓存目录。
-- 下载脚本默认直连，并临时忽略本机代理环境变量；若组员所在网络必须使用代理，可显式传入 `--use-env-proxy` 并自行配置标准 `HTTP_PROXY`/`HTTPS_PROXY`。
+- 下载脚本默认直连；若网络环境必须使用代理，可显式传入 `--use-env-proxy` 并配置标准代理变量。
 - 下载过程支持断点续传和已下载文件复用。
 - 下载完成后校验所需划分、文件数量、可读取性及模型 checkpoint revision。
 - 若自动下载因授权、网络或镜像限制失败，项目文档必须给出官方下载地址、可直接运行的命令以及文件应放置的本地目录。

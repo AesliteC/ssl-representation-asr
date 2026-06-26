@@ -27,8 +27,15 @@ Thumbs.db
 
 # Training outputs and model weights
 /artifacts/
-/outputs/
-/results/
+/outputs/*
+!/outputs/*/
+/outputs/*/*
+!/outputs/*/metrics.json
+!/outputs/*/eval/
+/outputs/*/eval/*
+!/outputs/*/eval/*.json
+/results/*
+!/results/summary.csv
 /logs/
 /checkpoints/
 /runs/

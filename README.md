@@ -4,25 +4,45 @@
 
 ## 环境
 
-推荐使用已约定的 Conda 环境：
+推荐使用 Conda 环境 `py310`，Python 版本固定为 `3.10.20`：
+
+```powershell
+conda create -n py310 python=3.10.20 -y
+conda activate py310
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+验证环境：
+
+```powershell
+conda run -n py310 python --version
+conda run -n py310 python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+如果需要指定 CUDA 版本，请先按 PyTorch 官方说明安装匹配的 `torch` 和 `torchaudio`，再安装其余依赖：
 
 ```powershell
 conda activate py310
-python --version
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-Python 版本应为 `3.10.20`。如果 PyTorch 需要匹配本机 CUDA，请优先按 PyTorch 官方安装命令安装 `torch` 和 `torchaudio`，再运行上面的 `pip install -r requirements.txt`。
-
-如果直连 PyPI 遇到 SSL 或超时问题，可以改用公开镜像安装：
+如果 PyPI 访问较慢，可以使用公开镜像：
 
 ```powershell
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+Windows 下可选安装 tmux，用于后台运行完整实验流水线：
+
+```powershell
+winget install arndawg.tmux-windows
+tmux -V
 ```
 
 ## 下载数据与模型
 
-下载脚本默认直连，并且会临时忽略本机 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 等代理环境变量。数据和模型都会写入被 `.gitignore` 排除的目录，不会提交到 Git。
+下载脚本默认直连。数据和模型都会写入被 `.gitignore` 排除的目录，不会提交到 Git。
 
 ```powershell
 conda activate py310
@@ -56,7 +76,7 @@ python scripts/download_assets.py --models wavlm-base-plus --models-only
 python scripts/download_assets.py --data-only --skip-extract
 ```
 
-如果某位组员所在网络必须使用代理，请显式打开环境代理模式，并自行填写自己的代理地址：
+如果网络环境必须使用代理，请显式打开环境代理模式，并设置标准代理变量：
 
 ```powershell
 $env:HTTPS_PROXY="http://<proxy-host>:<proxy-port>"
@@ -154,8 +174,8 @@ python scripts/run_experiments.py --config-dir configs/experiments --device cuda
 也可以用 Windows tmux 在后台启动完整流水线：
 
 ```powershell
-python scripts/start_tmux_experiments.py --tmux "$env:LOCALAPPDATA\Microsoft\WinGet\Links\tmux.exe" --device cuda
-& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\tmux.exe" attach -t ssl_asr_full
+python scripts/start_tmux_experiments.py --device cuda
+tmux attach -t ssl_asr_full
 ```
 
 对所有已训练 checkpoint 进行测试集评测并汇总：
@@ -173,6 +193,17 @@ python scripts/train.py --config configs/smoke/wavlm_units_ctc_smoke.yaml --devi
 python scripts/train.py --config configs/smoke/wavlm_continuous_transformer_smoke.yaml --device cuda --limit-train 2 --limit-dev 2
 ```
 
-## 当前阶段
+## 实验结果
 
-当前仓库已包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本、K-means/unit 脚本、训练脚本、评测脚本、汇总脚本、完整实验配置和 smoke 配置。
+完整实验包含 19 个训练配置。训练完成后，每个实验会保存：
+
+- `outputs/<experiment>/metrics.json`：dev 集最优 checkpoint 指标。
+- `outputs/<experiment>/eval/test-clean.json`：test-clean 指标。
+- `outputs/<experiment>/eval/test-other.json`：test-other 指标。
+- `results/summary.csv`：dev、test-clean、test-other 的总表。
+
+仓库只跟踪上述轻量结果文件。数据、SSL 特征缓存、离散 unit、模型 checkpoint 和日志不会提交到 Git。
+
+## 仓库内容
+
+仓库包含项目方案、下载脚本、manifest 构建脚本、冻结 SSL 特征提取脚本、K-means/unit 脚本、训练脚本、评测脚本、汇总脚本、完整实验配置和 smoke 配置。
